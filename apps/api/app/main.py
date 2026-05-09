@@ -1,5 +1,8 @@
 import io
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 import os
 
 import edge_tts
@@ -11,6 +14,7 @@ from pydantic import BaseModel as PydanticBase, ValidationError
 from app.guide import build_narration
 from app.matcher import match_resources
 from app.model_provider import provider
+from app.opendeepsearch import OpenDeepSearchUnavailable, search_resources
 from app.models import (
     ExplainRequest,
     ExplainResponse,
@@ -18,6 +22,7 @@ from app.models import (
     NarrationResponse,
     MatchRequest,
     MatchResponse,
+    SearchRequest,
     SENSITIVE_KEYS,
 )
 from app.resources import RESOURCE_BY_ID
@@ -102,6 +107,25 @@ async def profile_match(request: MatchRequest) -> MatchResponse:
         privacy=request.privacy,
         disclaimer=DISCLAIMER,
     )
+
+
+@app.post("/opendeepsearch", response_model=MatchResponse)
+async def opendeepsearch(request: SearchRequest) -> MatchResponse:
+    try:
+        results = await search_resources(request.profile, request.query, require_live=True)
+    except OpenDeepSearchUnavailable as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": str(exc),
+                "hint": (
+                    "Install OpenDeepSearch in the API environment and configure "
+                    "SERPER_API_KEY or SEARXNG_INSTANCE_URL plus a LiteLLM model key."
+                ),
+            },
+        )
+
+    return MatchResponse(results=results, privacy=request.privacy, disclaimer=DISCLAIMER)
 
 
 @app.post("/explain", response_model=ExplainResponse)

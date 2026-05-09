@@ -18,7 +18,7 @@ RESOURCES: list[Resource] = [
         id="calfresh",
         name="CalFresh",
         category="Food assistance",
-        official_url="https://benefitscal.com/",
+        official_url="https://www.getcalfresh.org/en/",
         source_url="https://calfresh.dss.ca.gov/food/eligibility/index.html",
         geography="California",
         urgent_need_tags=["food"],
@@ -147,4 +147,3 @@ RESOURCES: list[Resource] = [
 
 
 RESOURCE_BY_ID = {resource.id: resource for resource in RESOURCES}
-

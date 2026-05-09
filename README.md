@@ -33,11 +33,25 @@ Open the web app at `http://localhost:3001`. Load `apps/extension` as an unpacke
 
 ## Environment
 
-Optional model-powered guidance uses OpenRouter:
+OpenDeepSearch-backed benefits discovery uses OpenDeepSearch with Serper or
+SearXNG for retrieval and a LiteLLM-compatible model for synthesis:
 
 ```bash
+export OPENDEEPSEARCH_PROVIDER=serper
+export SERPER_API_KEY=...
 export OPENROUTER_API_KEY=...
-export OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct:free
+export OPENDEEPSEARCH_MODEL=openrouter/google/gemini-2.0-flash-001
+export OPENDEEPSEARCH_RERANKER=jina
+export JINA_API_KEY=...
 ```
 
-Without an API key, the backend returns deterministic demo-safe guidance.
+For SearXNG instead of Serper:
+
+```bash
+export OPENDEEPSEARCH_PROVIDER=searxng
+export SEARXNG_INSTANCE_URL=https://your-searxng-instance.com
+export SEARXNG_API_KEY=... # optional
+```
+
+Without search/model credentials, the backend returns empty live-search results
+and keeps deterministic demo-safe guidance for explanation endpoints.
