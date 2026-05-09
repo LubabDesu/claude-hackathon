@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from app.guide import build_guidance
 from app.matcher import match_resources
 from app.model_provider import provider
+from app.opendeepsearch import search_resources
 from app.models import (
     ExplainRequest,
     ExplainResponse,
@@ -15,6 +16,7 @@ from app.models import (
     GuidePageResponse,
     MatchRequest,
     MatchResponse,
+    SearchRequest,
     SENSITIVE_KEYS,
 )
 from app.resources import RESOURCE_BY_ID
@@ -90,6 +92,15 @@ async def health() -> dict[str, str]:
 async def profile_match(request: MatchRequest) -> MatchResponse:
     return MatchResponse(
         results=match_resources(request.profile),
+        privacy=request.privacy,
+        disclaimer=DISCLAIMER,
+    )
+
+
+@app.post("/opendeepsearch", response_model=MatchResponse)
+async def opendeepsearch(request: SearchRequest) -> MatchResponse:
+    return MatchResponse(
+        results=search_resources(request.profile, request.query),
         privacy=request.privacy,
         disclaimer=DISCLAIMER,
     )

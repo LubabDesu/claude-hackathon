@@ -35,6 +35,26 @@ def test_sensitive_fields_are_rejected():
     assert "Sensitive fields" in response.text
 
 
+def test_opendeepsearch_returns_match_scores():
+    response = client.post(
+        "/opendeepsearch",
+        json={"profile": BASE_PROFILE, "query": "food assistance in San Diego"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["results"]
+    assert body["results"][0]["resource"]["id"] == "calfresh"
+    assert isinstance(body["results"][0]["score"], int)
+
+
+def test_opendeepsearch_sorting_uses_match_scores():
+    response = client.post("/opendeepsearch", json={"profile": BASE_PROFILE, "query": ""})
+    assert response.status_code == 200
+    body = response.json()
+    scores = [item["score"] for item in body["results"]]
+    assert scores == sorted(scores, reverse=True)
+
+
 def test_guide_stops_on_sensitive_page():
     response = client.post(
         "/guide/page",

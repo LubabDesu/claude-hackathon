@@ -71,6 +71,7 @@ def match_resources(profile: UserProfile) -> list[MatchResult]:
             MatchResult(
                 resource=resource,
                 match_level=match_level,
+                score=score,
                 reasons=reasons,
                 blockers=blockers,
                 required_documents=resource.required_documents,

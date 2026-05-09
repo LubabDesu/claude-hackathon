@@ -10,14 +10,15 @@ def search_resources(profile: UserProfile, query: str) -> list[MatchResult]:
     results = match_resources(profile)
     normalized_query = _normalize_text(query)
     if not normalized_query:
-        return results
+        return sorted(results, key=_rank_by_match_score, reverse=True)
 
     query_tokens = _tokenize(normalized_query)
-    scored_results: list[tuple[int, MatchResult]] = []
+    scored_results: list[tuple[float, MatchResult]] = []
 
     for result in results:
         relevance = _query_relevance(query_tokens, result.resource)
-        scored_results.append((relevance, result))
+        combined_score = _combined_search_score(result.score, relevance)
+        scored_results.append((combined_score, result))
 
     scored_results.sort(key=lambda pair: (-pair[0], _rank_tiebreaker(pair[1])))
     return [result for _, result in scored_results]
@@ -102,3 +103,11 @@ def _field_match_score(tokens: list[str], fields: list[str]) -> int:
 def _rank_tiebreaker(result: MatchResult) -> tuple[int, str]:
     order = {"likely match": 0, "possible match": 1, "unlikely based on what you shared": 2}
     return (order.get(result.match_level, 3), result.resource.name)
+
+
+def _combined_search_score(match_score: int, relevance_score: int) -> float:
+    return max(match_score, 0) * 10 + relevance_score
+
+
+def _rank_by_match_score(result: MatchResult) -> int:
+    return max(result.score, 0)

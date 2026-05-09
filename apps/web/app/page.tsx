@@ -43,7 +43,11 @@ type MatchResult = {
     geography: string;
     human_help: string[];
   };
-  match_level: "likely match" | "possible match" | "unlikely based on what you shared";
+  match_level:
+    | "likely match"
+    | "possible match"
+    | "unlikely based on what you shared";
+  score?: number;
   reasons: string[];
   blockers: string[];
   required_documents: string[];
@@ -108,15 +112,19 @@ const languageOptions: Array<{
   { code: "es", nativeName: "Español", englishName: "Spanish" },
   { code: "vi", nativeName: "Tiếng Việt", englishName: "Vietnamese" },
   { code: "ar", nativeName: "العربية", englishName: "Arabic" },
-  { code: "zh-Hans", nativeName: "简体中文", englishName: "Chinese (Simplified)" },
+  {
+    code: "zh-Hans",
+    nativeName: "简体中文",
+    englishName: "Chinese (Simplified)",
+  },
   { code: "so", nativeName: "Soomaali", englishName: "Somali" },
   { code: "tl", nativeName: "Tagalog", englishName: "Tagalog" },
   { code: "ko", nativeName: "한국어", englishName: "Korean" },
-  { code: "other", nativeName: "Other", englishName: "Other" }
+  { code: "other", nativeName: "Other", englishName: "Other" },
 ];
 
 const languageByCode = Object.fromEntries(
-  languageOptions.map((language) => [language.code, language])
+  languageOptions.map((language) => [language.code, language]),
 ) as Record<LanguageCode, (typeof languageOptions)[number]>;
 
 const languageAliases: Record<string, LanguageCode> = {
@@ -128,7 +136,7 @@ const languageAliases: Record<string, LanguageCode> = {
   Somali: "so",
   Tagalog: "tl",
   Korean: "ko",
-  Other: "other"
+  Other: "other",
 };
 
 const baseStatuses: Copy["statuses"] = {
@@ -136,7 +144,7 @@ const baseStatuses: Copy["statuses"] = {
   citizen_or_national: "U.S. citizen or national",
   lawful_permanent_resident: "Permanent resident (green card)",
   mixed_household: "Mixed-status household",
-  other: "Other or not sure"
+  other: "Other or not sure",
 };
 
 const translations: Record<LanguageCode, Copy> = {
@@ -162,7 +170,7 @@ const translations: Record<LanguageCode, Copy> = {
     flags: {
       dependents: "Children or dependents",
       student: "Student",
-      veteran: "Veteran"
+      veteran: "Veteran",
     },
     needsTitle: "What do you need most?",
     selectAll: "Select all that apply.",
@@ -172,7 +180,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Cash aid",
       utilities: "Utilities",
       housing: "Housing",
-      childcare: "Child care"
+      childcare: "Child care",
     },
     next: "Next",
     back: "Back",
@@ -190,8 +198,8 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "likely match",
       "possible match": "possible match",
-      "unlikely based on what you shared": "unlikely based on what you shared"
-    }
+      "unlikely based on what you shared": "unlikely based on what you shared",
+    },
   },
   es: {
     appLang: "es",
@@ -216,12 +224,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "Ciudadano o nacional de EE. UU.",
       lawful_permanent_resident: "Residente permanente (green card)",
       mixed_household: "Hogar con estatus mixto",
-      other: "Otro o no estoy seguro"
+      other: "Otro o no estoy seguro",
     },
     flags: {
       dependents: "Niños o dependientes",
       student: "Estudiante",
-      veteran: "Veterano"
+      veteran: "Veterano",
     },
     needsTitle: "¿Qué necesitas más?",
     selectAll: "Selecciona todo lo que aplique.",
@@ -231,7 +239,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Ayuda en efectivo",
       utilities: "Servicios públicos",
       housing: "Vivienda",
-      childcare: "Cuidado infantil"
+      childcare: "Cuidado infantil",
     },
     next: "Siguiente",
     back: "Atrás",
@@ -239,7 +247,8 @@ const translations: Record<LanguageCode, Copy> = {
     findBenefits: "Buscar beneficios",
     resultsKicker: "Clasificación de fuentes oficiales",
     resultsTitle: "Programas recomendados",
-    emptyStrong: "Completa el formulario corto para ver programas que podrían ayudarte.",
+    emptyStrong:
+      "Completa el formulario corto para ver programas que podrían ayudarte.",
     emptyText: "Toma cerca de 1 minuto. No necesita SSN.",
     errorDefault: "No se pudo conectar con el servicio local.",
     check: "Revisar",
@@ -249,8 +258,9 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "probable coincidencia",
       "possible match": "posible coincidencia",
-      "unlikely based on what you shared": "poco probable según lo que compartiste"
-    }
+      "unlikely based on what you shared":
+        "poco probable según lo que compartiste",
+    },
   },
   vi: {
     appLang: "vi",
@@ -275,12 +285,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "Công dân hoặc công dân quốc gia Hoa Kỳ",
       lawful_permanent_resident: "Thường trú nhân (thẻ xanh)",
       mixed_household: "Hộ gia đình có tình trạng hỗn hợp",
-      other: "Khác hoặc không chắc"
+      other: "Khác hoặc không chắc",
     },
     flags: {
       dependents: "Trẻ em hoặc người phụ thuộc",
       student: "Sinh viên",
-      veteran: "Cựu chiến binh"
+      veteran: "Cựu chiến binh",
     },
     needsTitle: "Bạn cần gì nhất?",
     selectAll: "Chọn tất cả mục phù hợp.",
@@ -290,7 +300,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Trợ cấp tiền mặt",
       utilities: "Tiện ích",
       housing: "Nhà ở",
-      childcare: "Chăm sóc trẻ em"
+      childcare: "Chăm sóc trẻ em",
     },
     next: "Tiếp",
     back: "Quay lại",
@@ -308,8 +318,9 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "có khả năng phù hợp",
       "possible match": "có thể phù hợp",
-      "unlikely based on what you shared": "ít có khả năng dựa trên thông tin bạn chia sẻ"
-    }
+      "unlikely based on what you shared":
+        "ít có khả năng dựa trên thông tin bạn chia sẻ",
+    },
   },
   ar: {
     appLang: "ar",
@@ -335,12 +346,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "مواطن أو تابع للولايات المتحدة",
       lawful_permanent_resident: "مقيم دائم (بطاقة خضراء)",
       mixed_household: "أسرة ذات حالات مختلفة",
-      other: "آخر أو غير متأكد"
+      other: "آخر أو غير متأكد",
     },
     flags: {
       dependents: "أطفال أو معالون",
       student: "طالب",
-      veteran: "محارب قديم"
+      veteran: "محارب قديم",
     },
     needsTitle: "ما الذي تحتاجه أكثر؟",
     selectAll: "اختر كل ما ينطبق.",
@@ -350,7 +361,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "مساعدة نقدية",
       utilities: "خدمات",
       housing: "سكن",
-      childcare: "رعاية أطفال"
+      childcare: "رعاية أطفال",
     },
     next: "التالي",
     back: "رجوع",
@@ -368,8 +379,8 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "مطابقة محتملة",
       "possible match": "مطابقة ممكنة",
-      "unlikely based on what you shared": "غير مرجح بناء على ما شاركته"
-    }
+      "unlikely based on what you shared": "غير مرجح بناء على ما شاركته",
+    },
   },
   "zh-Hans": {
     appLang: "zh-Hans",
@@ -394,12 +405,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "美国公民或国民",
       lawful_permanent_resident: "永久居民（绿卡）",
       mixed_household: "混合身份家庭",
-      other: "其他或不确定"
+      other: "其他或不确定",
     },
     flags: {
       dependents: "儿童或受抚养人",
       student: "学生",
-      veteran: "退伍军人"
+      veteran: "退伍军人",
     },
     needsTitle: "你最需要什么？",
     selectAll: "选择所有符合的项目。",
@@ -409,7 +420,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "现金援助",
       utilities: "水电燃气",
       housing: "住房",
-      childcare: "儿童照护"
+      childcare: "儿童照护",
     },
     next: "下一步",
     back: "返回",
@@ -427,8 +438,8 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "很可能符合",
       "possible match": "可能符合",
-      "unlikely based on what you shared": "根据你提供的信息不太可能符合"
-    }
+      "unlikely based on what you shared": "根据你提供的信息不太可能符合",
+    },
   },
   so: {
     appLang: "so",
@@ -440,7 +451,8 @@ const translations: Record<LanguageCode, Copy> = {
     privacyUnsaved: "Jawaabahaagu waxay ku ekaanayaan qalabkan oo keliya.",
     remember: "Ku xasuuso jawaabahayga qalabkan",
     languageTitle: "Dooro luqaddaada.",
-    languageHelp: "Qaybaha kale ee hagaha waxay isticmaali doonaan luqadda aad doorato.",
+    languageHelp:
+      "Qaybaha kale ee hagaha waxay isticmaali doonaan luqadda aad doorato.",
     locationTitle: "Xaggee ku nooshahay?",
     zipLabel: "ZIP code",
     householdTitle: "Nooga warran qoyskaaga.",
@@ -453,12 +465,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "Muwaadin ama national Maraykan ah",
       lawful_permanent_resident: "Degane rasmi ah (green card)",
       mixed_household: "Qoys leh xaalado kala duwan",
-      other: "Kale ama ma hubo"
+      other: "Kale ama ma hubo",
     },
     flags: {
       dependents: "Carruur ama dad kugu tiirsan",
       student: "Arday",
-      veteran: "Ciidan hore"
+      veteran: "Ciidan hore",
     },
     needsTitle: "Maxaad ugu baahan tahay?",
     selectAll: "Dooro dhammaan kuwa ku khuseeya.",
@@ -468,7 +480,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Kaalmo lacag ah",
       utilities: "Adeegyada guriga",
       housing: "Guri",
-      childcare: "Daryeel carruur"
+      childcare: "Daryeel carruur",
     },
     next: "Xiga",
     back: "Dib u noqo",
@@ -476,7 +488,8 @@ const translations: Record<LanguageCode, Copy> = {
     findBenefits: "Raadi gargaar",
     resultsKicker: "Kala-sarraynta ilo rasmi ah",
     resultsTitle: "Barnaamijyo lagu taliyay",
-    emptyStrong: "Buuxi foomka gaaban si aad u aragto barnaamijyo ku caawin kara.",
+    emptyStrong:
+      "Buuxi foomka gaaban si aad u aragto barnaamijyo ku caawin kara.",
     emptyText: "Waxay qaadataa qiyaastii 1 daqiiqo. SSN looma baahna.",
     errorDefault: "Lama gaari karo adeegga maxalliga ah.",
     check: "Hubi",
@@ -486,8 +499,9 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "waxay u badan tahay inuu ku habboon yahay",
       "possible match": "waa suurtagal inuu ku habboon yahay",
-      "unlikely based on what you shared": "uma badna marka loo eego waxa aad sheegtay"
-    }
+      "unlikely based on what you shared":
+        "uma badna marka loo eego waxa aad sheegtay",
+    },
   },
   tl: {
     appLang: "tl",
@@ -512,12 +526,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "Mamamayan o national ng U.S.",
       lawful_permanent_resident: "Permanent resident (green card)",
       mixed_household: "Sambahayan na may halo-halong status",
-      other: "Iba pa o hindi sigurado"
+      other: "Iba pa o hindi sigurado",
     },
     flags: {
       dependents: "Mga anak o umaasa sa iyo",
       student: "Estudyante",
-      veteran: "Beterano"
+      veteran: "Beterano",
     },
     needsTitle: "Ano ang pinaka-kailangan mo?",
     selectAll: "Piliin ang lahat ng naaangkop.",
@@ -527,7 +541,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Tulong pinansyal",
       utilities: "Utilities",
       housing: "Pabahay",
-      childcare: "Pag-aalaga ng bata"
+      childcare: "Pag-aalaga ng bata",
     },
     next: "Susunod",
     back: "Bumalik",
@@ -535,7 +549,8 @@ const translations: Record<LanguageCode, Copy> = {
     findBenefits: "Maghanap ng benepisyo",
     resultsKicker: "Ranggo mula sa opisyal na sanggunian",
     resultsTitle: "Mga inirerekomendang programa",
-    emptyStrong: "Sagutan ang maikling form para makita ang mga programang maaaring makatulong.",
+    emptyStrong:
+      "Sagutan ang maikling form para makita ang mga programang maaaring makatulong.",
     emptyText: "Mga 1 minuto lang. Hindi kailangan ang SSN.",
     errorDefault: "Hindi maabot ang lokal na serbisyo.",
     check: "Suriin",
@@ -545,8 +560,9 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "malamang tugma",
       "possible match": "posibleng tugma",
-      "unlikely based on what you shared": "hindi malamang batay sa ibinahagi mo"
-    }
+      "unlikely based on what you shared":
+        "hindi malamang batay sa ibinahagi mo",
+    },
   },
   ko: {
     appLang: "ko",
@@ -571,12 +587,12 @@ const translations: Record<LanguageCode, Copy> = {
       citizen_or_national: "미국 시민권자 또는 국민",
       lawful_permanent_resident: "영주권자 (그린카드)",
       mixed_household: "신분이 혼합된 가구",
-      other: "기타 또는 잘 모름"
+      other: "기타 또는 잘 모름",
     },
     flags: {
       dependents: "자녀 또는 부양가족",
       student: "학생",
-      veteran: "재향군인"
+      veteran: "재향군인",
     },
     needsTitle: "가장 필요한 것은 무엇인가요?",
     selectAll: "해당하는 항목을 모두 선택하세요.",
@@ -586,7 +602,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "현금 지원",
       utilities: "공과금",
       housing: "주거",
-      childcare: "보육"
+      childcare: "보육",
     },
     next: "다음",
     back: "뒤로",
@@ -594,7 +610,8 @@ const translations: Record<LanguageCode, Copy> = {
     findBenefits: "혜택 찾기",
     resultsKicker: "공식 출처 순위",
     resultsTitle: "추천 프로그램",
-    emptyStrong: "짧은 양식을 작성하면 도움이 될 수 있는 프로그램을 볼 수 있습니다.",
+    emptyStrong:
+      "짧은 양식을 작성하면 도움이 될 수 있는 프로그램을 볼 수 있습니다.",
     emptyText: "약 1분이 걸립니다. SSN은 필요하지 않습니다.",
     errorDefault: "로컬 매칭 서비스에 연결할 수 없습니다.",
     check: "확인",
@@ -604,8 +621,8 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "가능성이 높은 일치",
       "possible match": "가능한 일치",
-      "unlikely based on what you shared": "제공한 정보로는 가능성이 낮음"
-    }
+      "unlikely based on what you shared": "제공한 정보로는 가능성이 낮음",
+    },
   },
   other: {
     appLang: "en",
@@ -629,7 +646,7 @@ const translations: Record<LanguageCode, Copy> = {
     flags: {
       dependents: "Children or dependents",
       student: "Student",
-      veteran: "Veteran"
+      veteran: "Veteran",
     },
     needsTitle: "What do you need most?",
     selectAll: "Select all that apply.",
@@ -639,7 +656,7 @@ const translations: Record<LanguageCode, Copy> = {
       cash: "Cash aid",
       utilities: "Utilities",
       housing: "Housing",
-      childcare: "Child care"
+      childcare: "Child care",
     },
     next: "Next",
     back: "Back",
@@ -657,9 +674,9 @@ const translations: Record<LanguageCode, Copy> = {
     matchLevels: {
       "likely match": "likely match",
       "possible match": "possible match",
-      "unlikely based on what you shared": "unlikely based on what you shared"
-    }
-  }
+      "unlikely based on what you shared": "unlikely based on what you shared",
+    },
+  },
 };
 
 const defaultProfile: UserProfile = {
@@ -672,7 +689,7 @@ const defaultProfile: UserProfile = {
   isStudent: false,
   isVeteran: false,
   immigrationCategory: "prefer_not_to_say",
-  urgentNeeds: ["food", "healthcare"]
+  urgentNeeds: ["food", "healthcare"],
 };
 
 const needIconPaths: Record<string, React.ReactNode> = {
@@ -702,7 +719,7 @@ const needIconPaths: Record<string, React.ReactNode> = {
       <circle cx="12" cy="8" r="4" />
       <path d="M6 20v-2a6 6 0 0 1 12 0v2" />
     </>
-  )
+  ),
 };
 
 function normalizeLanguage(language: unknown): LanguageCode {
@@ -724,13 +741,16 @@ function normalizeProfile(profile: unknown): UserProfile {
   return {
     ...defaultProfile,
     ...candidate,
-    language: normalizeLanguage(candidate.language)
+    language: normalizeLanguage(candidate.language),
   };
 }
 
 function StepDots({ current, copy }: { current: number; copy: Copy }) {
   return (
-    <div className="stepIndicator" aria-label={copy.stepLabel(current, TOTAL_STEPS)}>
+    <div
+      className="stepIndicator"
+      aria-label={copy.stepLabel(current, TOTAL_STEPS)}
+    >
       {Array.from({ length: TOTAL_STEPS }, (_, index) => index + 1).map((n) => (
         <span key={n} className={`stepDot${n <= current ? " active" : ""}`} />
       ))}
@@ -741,7 +761,17 @@ function StepDots({ current, copy }: { current: number; copy: Copy }) {
 
 function LockIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
@@ -750,7 +780,15 @@ function LockIcon() {
 
 function NeedIcon({ id }: { id: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {needIconPaths[id]}
     </svg>
   );
@@ -793,24 +831,63 @@ export default function Home() {
 
   const privacyMessage = useMemo(
     () => (saveLocal ? copy.privacySaved : copy.privacyUnsaved),
-    [copy, saveLocal]
+    [copy, saveLocal],
   );
+
+  const topResults = useMemo(() => results.slice(0, 3), [results]);
+
+  const resultsExplanation = useMemo(() => {
+    if (!topResults.length) {
+      return "";
+    }
+
+    const summary = new Set<string>();
+    topResults.forEach((result) => {
+      result.reasons.slice(0, 2).forEach((reason) => summary.add(reason));
+    });
+
+    const phrases = Array.from(summary).slice(0, 4);
+    if (!phrases.length) {
+      return "";
+    }
+
+    const text = phrases.join(", ").replace(/, ([^,]*)$/, " and $1");
+    return `These top three programs were chosen because ${text}.`;
+  }, [topResults]);
+
+  function buildProfileQuery() {
+    const needs = profile.urgentNeeds.length
+      ? `${profile.urgentNeeds.join(", ")} assistance`
+      : "benefits";
+    const location = profile.county
+      ? `${profile.county} county`
+      : profile.zipCode
+        ? `ZIP ${profile.zipCode}`
+        : "California";
+    const immigration =
+      profile.immigrationCategory !== "prefer_not_to_say"
+        ? profile.immigrationCategory.replace(/_/g, " ")
+        : "";
+
+    return [needs, location, immigration].filter(Boolean).join(" ").trim();
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`${API_BASE_URL}/profile/match`, {
+      const response = await fetch(`${API_BASE_URL}/opendeepsearch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profile: {
             ...profile,
-            language: languageByCode[profile.language].englishName
+            language: languageByCode[profile.language].englishName,
           },
-          language: languageByCode[profile.language].englishName
-        })
+          query: buildProfileQuery(),
+          language: languageByCode[profile.language].englishName,
+        }),
       });
       if (!response.ok) {
         throw new Error(await response.text());
@@ -829,7 +906,7 @@ export default function Home() {
       ...current,
       urgentNeeds: current.urgentNeeds.includes(need)
         ? current.urgentNeeds.filter((item) => item !== need)
-        : [...current.urgentNeeds, need]
+        : [...current.urgentNeeds, need],
     }));
   }
 
@@ -875,7 +952,11 @@ export default function Home() {
               <StepDots current={1} copy={copy} />
               <p className="stepTitle">{copy.languageTitle}</p>
               <p className="stepHint">{copy.languageHelp}</p>
-              <div className="languageGrid" role="radiogroup" aria-label={copy.languageTitle}>
+              <div
+                className="languageGrid"
+                role="radiogroup"
+                aria-label={copy.languageTitle}
+              >
                 {languageOptions.map((language) => (
                   <button
                     key={language.code}
@@ -889,7 +970,11 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              <button type="button" className="primary" onClick={() => setStep(2)}>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setStep(2)}
+              >
                 {copy.next} →
               </button>
             </>
@@ -898,7 +983,11 @@ export default function Home() {
           {step === 2 && (
             <>
               <StepDots current={2} copy={copy} />
-              <button type="button" className="backBtn" onClick={() => setStep(1)}>
+              <button
+                type="button"
+                className="backBtn"
+                onClick={() => setStep(1)}
+              >
                 ← {copy.back}
               </button>
               <p className="stepTitle">{copy.locationTitle}</p>
@@ -909,7 +998,9 @@ export default function Home() {
                     inputMode="numeric"
                     maxLength={5}
                     value={profile.zipCode}
-                    onChange={(e) => setProfile({ ...profile, zipCode: e.target.value })}
+                    onChange={(e) =>
+                      setProfile({ ...profile, zipCode: e.target.value })
+                    }
                     placeholder="e.g. 92101"
                   />
                 </label>
@@ -928,7 +1019,11 @@ export default function Home() {
           {step === 3 && (
             <>
               <StepDots current={3} copy={copy} />
-              <button type="button" className="backBtn" onClick={() => setStep(2)}>
+              <button
+                type="button"
+                className="backBtn"
+                onClick={() => setStep(2)}
+              >
                 ← {copy.back}
               </button>
               <p className="stepTitle">{copy.householdTitle}</p>
@@ -941,7 +1036,10 @@ export default function Home() {
                     max="20"
                     value={profile.householdSize}
                     onChange={(e) =>
-                      setProfile({ ...profile, householdSize: Number(e.target.value) })
+                      setProfile({
+                        ...profile,
+                        householdSize: Number(e.target.value),
+                      })
                     }
                   />
                 </label>
@@ -950,7 +1048,10 @@ export default function Home() {
                   <select
                     value={profile.monthlyIncomeRange}
                     onChange={(e) =>
-                      setProfile({ ...profile, monthlyIncomeRange: e.target.value })
+                      setProfile({
+                        ...profile,
+                        monthlyIncomeRange: e.target.value,
+                      })
                     }
                   >
                     <option value="0-1500">$0 - $1,500</option>
@@ -968,15 +1069,18 @@ export default function Home() {
                   onChange={(e) =>
                     setProfile({
                       ...profile,
-                      immigrationCategory: e.target.value as ImmigrationCategory
+                      immigrationCategory: e.target
+                        .value as ImmigrationCategory,
                     })
                   }
                 >
-                  {(Object.keys(copy.statuses) as ImmigrationCategory[]).map((status) => (
-                    <option key={status} value={status}>
-                      {copy.statuses[status]}
-                    </option>
-                  ))}
+                  {(Object.keys(copy.statuses) as ImmigrationCategory[]).map(
+                    (status) => (
+                      <option key={status} value={status}>
+                        {copy.statuses[status]}
+                      </option>
+                    ),
+                  )}
                 </select>
               </label>
               <div className="flags" aria-label={copy.statusLabel}>
@@ -984,7 +1088,12 @@ export default function Home() {
                   <input
                     type="checkbox"
                     checked={profile.hasDependents}
-                    onChange={(e) => setProfile({ ...profile, hasDependents: e.target.checked })}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        hasDependents: e.target.checked,
+                      })
+                    }
                   />
                   {copy.flags.dependents}
                 </label>
@@ -992,7 +1101,9 @@ export default function Home() {
                   <input
                     type="checkbox"
                     checked={profile.isStudent}
-                    onChange={(e) => setProfile({ ...profile, isStudent: e.target.checked })}
+                    onChange={(e) =>
+                      setProfile({ ...profile, isStudent: e.target.checked })
+                    }
                   />
                   {copy.flags.student}
                 </label>
@@ -1000,12 +1111,18 @@ export default function Home() {
                   <input
                     type="checkbox"
                     checked={profile.isVeteran}
-                    onChange={(e) => setProfile({ ...profile, isVeteran: e.target.checked })}
+                    onChange={(e) =>
+                      setProfile({ ...profile, isVeteran: e.target.checked })
+                    }
                   />
                   {copy.flags.veteran}
                 </label>
               </div>
-              <button type="button" className="primary" onClick={() => setStep(4)}>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setStep(4)}
+              >
                 {copy.next} →
               </button>
             </>
@@ -1014,12 +1131,20 @@ export default function Home() {
           {step === 4 && (
             <>
               <StepDots current={4} copy={copy} />
-              <button type="button" className="backBtn" onClick={() => setStep(3)}>
+              <button
+                type="button"
+                className="backBtn"
+                onClick={() => setStep(3)}
+              >
                 ← {copy.back}
               </button>
               <p className="needsTitle">{copy.needsTitle}</p>
               <p className="stepHint">{copy.selectAll}</p>
-              <div className="needsGrid" role="group" aria-label={copy.needsTitle}>
+              <div
+                className="needsGrid"
+                role="group"
+                aria-label={copy.needsTitle}
+              >
                 {Object.entries(copy.needs).map(([id, label]) => (
                   <button
                     key={id}
@@ -1053,43 +1178,57 @@ export default function Home() {
               <p>{copy.emptyText}</p>
             </div>
           ) : (
-            results.map((result) => (
-              <article className="resultCard" key={result.resource.id}>
-                <div>
-                  <span className="badge">{copy.matchLevels[result.match_level]}</span>
-                  <h3>{result.resource.name}</h3>
-                  <p>{result.next_action}</p>
+            <>
+              {resultsExplanation ? (
+                <div className="resultsSummary">
+                  <p>{resultsExplanation}</p>
                 </div>
-                <div className="resultMeta">
-                  <span>{result.resource.category}</span>
-                  <span>{result.resource.geography}</span>
-                </div>
-                <ul>
-                  {result.reasons.slice(0, 3).map((reason) => (
-                    <li key={reason}>{reason}</li>
-                  ))}
-                </ul>
-                {result.blockers.length > 0 ? (
-                  <p className="blocker">{copy.check}: {result.blockers.join("; ")}</p>
-                ) : null}
-                <div className="actions">
-                  <a
-                    href={result.resource.official_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {copy.officialSite}
-                  </a>
-                  <a
-                    href={result.resource.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {copy.viewSource}
-                  </a>
-                </div>
-              </article>
-            ))
+              ) : null}
+              {topResults.map((result) => (
+                <article className="resultCard" key={result.resource.id}>
+                  <div>
+                    <span className="badge">
+                      {copy.matchLevels[result.match_level]}
+                    </span>
+                    <h3>{result.resource.name}</h3>
+                    <p>{result.next_action}</p>
+                  </div>
+                  <div className="resultMeta">
+                    <span>{result.resource.category}</span>
+                    <span>{result.resource.geography}</span>
+                    {typeof result.score === "number" ? (
+                      <span className="score">Score: {result.score}</span>
+                    ) : null}
+                  </div>
+                  <ul>
+                    {result.reasons.slice(0, 3).map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                  {result.blockers.length > 0 ? (
+                    <p className="blocker">
+                      {copy.check}: {result.blockers.join("; ")}
+                    </p>
+                  ) : null}
+                  <div className="actions">
+                    <a
+                      href={result.resource.official_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {copy.officialSite}
+                    </a>
+                    <a
+                      href={result.resource.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {copy.viewSource}
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </>
           )}
         </section>
       </section>

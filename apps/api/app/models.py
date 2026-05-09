@@ -77,6 +77,7 @@ class Resource(BaseModel):
 class MatchResult(BaseModel):
     resource: Resource
     match_level: MatchLevel
+    score: int
     reasons: list[str]
     blockers: list[str]
     required_documents: list[str]
@@ -85,6 +86,13 @@ class MatchResult(BaseModel):
 
 class MatchRequest(BaseModel):
     profile: UserProfile
+    language: str | None = None
+    privacy: PrivacyPreferences = Field(default_factory=PrivacyPreferences)
+
+
+class SearchRequest(BaseModel):
+    profile: UserProfile
+    query: str = ""
     language: str | None = None
     privacy: PrivacyPreferences = Field(default_factory=PrivacyPreferences)
 
