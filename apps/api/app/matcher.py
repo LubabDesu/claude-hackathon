@@ -137,8 +137,9 @@ def match_resources(
             citations.append(f"{resource.source_url} - Program overview")
 
         match_level = _score_to_level(score, blockers)
-        # Normalize score to 0-100 scale
-        normalized_score = min(100.0, max(0.0, score * 5.5))
+        # Normalize score to 0-100 scale based on max achievable raw points (~37.5)
+        MAX_RAW_SCORE = 37.5
+        normalized_score = min(100.0, max(0.0, round(score / MAX_RAW_SCORE * 100, 2)))
         results.append(
             MatchResult(
                 resource=resource,
@@ -147,7 +148,7 @@ def match_resources(
                 score_breakdown=ScoreBreakdown(
                     raw_score=round(score, 2),
                     normalized_score=round(normalized_score, 2),
-                    formula="Raw profile-fit points x 5.5, capped from 0 to 100.",
+                    formula="Raw profile-fit points normalized by MAX_RAW_SCORE (37.5), capped at 100.",
                     items=breakdown,
                 ),
                 reasons=reasons,
@@ -174,7 +175,8 @@ def _income_limit_for_household(limits: dict[int, int], household_size: int) -> 
 
 
 def _score_to_level(score: float, blockers: list[str]) -> str:
-    if score >= 38.5 and not blockers:
+    # Lowered from 38.5 to 25.0 to ensure Likely matches are possible with the new scale
+    if score >= 25.0 and not blockers:
         return "likely match"
     if score >= 16.5:
         return "possible match"

@@ -44,7 +44,7 @@ except Exception:  # pragma: no cover - depends on optional runtime package
 
 from app.matcher import match_resources
 from app.models import MatchResult, Resource, UserProfile
-from app.resources import RESOURCES
+from app.resources import RESOURCES, RESOURCE_BY_ID
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,14 @@ async def search_resources(
             "OpenDeepSearch ran, but did not return any parseable official program results."
         )
 
-    resource_list = live_resources if live_resources else RESOURCES
+    # MERGE LOGIC: Combine live results with static resources.
+    # If a live result has the same ID as a static one, prefer the static one (high quality).
+    merged_map = {r.id: r for r in RESOURCES}
+    for r in live_resources:
+        if r.id not in merged_map:
+            merged_map[r.id] = r
+    
+    resource_list = list(merged_map.values())
     results = match_resources(profile, resource_list=resource_list)
 
     if not query.strip():
@@ -140,12 +147,14 @@ async def _live_search(
 
     prompt = _build_resource_prompt(profile, query)
     try:
+        print(f"\n[DEBUG] --- OpenDeepSearch Prompt ---\n{prompt}\n")
         raw = await asyncio.to_thread(
             agent.ask_sync,
             prompt,
             _open_deep_search_max_sources(),
             True,
         )
+        print(f"[DEBUG] --- Raw LLM Response ---\n{raw}\n")
     except Exception as exc:
         message = f"OpenDeepSearch request failed: {exc}"
         logger.warning(message)
@@ -226,9 +235,18 @@ def _get_search_agent(*, require_live: bool = False) -> Any | None:
     provider = _open_deep_search_provider()
     model = os.getenv(
         "OPENDEEPSEARCH_MODEL",
-        os.getenv("OPENROUTER_MODEL", "openrouter/google/gemini-2.0-flash-001"),
+        os.getenv(
+            "OPENROUTER_RANKING_MODEL",
+            os.getenv("OPENROUTER_MODEL", "openrouter/google/gemini-2.0-flash-001"),
+        ),
     )
-    reranker = os.getenv("OPENDEEPSEARCH_RERANKER", "jina")
+    
+    # Use custom ranking model if provided, otherwise default to jina
+    reranker = os.getenv(
+        "OPENDEEPSEARCH_RERANKER", 
+        os.getenv("OPENROUTER_RANKING_MODEL", "jina")
+    )
+    
     config = (provider, model, reranker)
 
     if _SEARCH_AGENT is not None and _SEARCH_AGENT_CONFIG == config:
