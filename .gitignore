@@ -1,5 +1,11 @@
 node_modules
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
 # Next.js build output and caches
 .next
 apps/**/.next
