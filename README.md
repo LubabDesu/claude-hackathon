@@ -16,7 +16,7 @@ Profile data is session-only by default. The backend does not persist user profi
 
 ```bash
 npm install
-npm run dev:web -- --port 3001
+npm run dev
 ```
 
 In another terminal:
