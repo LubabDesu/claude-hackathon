@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Benefits Navigator Guide",
+  "version": "0.1.0",
+  "description": "Multilingual step-by-step guidance for official benefits pages.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://localhost:8000/*", "https://*/*", "http://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Benefits Guide",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}
+
