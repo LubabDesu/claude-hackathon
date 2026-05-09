@@ -42,12 +42,24 @@ type MatchResult = {
     source_url: string;
     geography: string;
     human_help: string[];
+    application_methods: string[];
+    source_last_reviewed?: string;
   };
   match_level:
     | "likely match"
     | "possible match"
     | "unlikely based on what you shared";
   score?: number;
+  score_breakdown?: {
+    raw_score: number;
+    normalized_score: number;
+    formula: string;
+    items: Array<{
+      label: string;
+      points: number;
+      detail: string;
+    }>;
+  } | null;
   reasons: string[];
   blockers: string[];
   required_documents: string[];
@@ -802,6 +814,7 @@ export default function Home() {
   const [results, setResults] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
   const copy = translations[profile.language];
 
@@ -877,6 +890,7 @@ export default function Home() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setHasSearched(true);
     try {
       const response = await fetch(`${API_BASE_URL}/opendeepsearch`, {
         method: "POST",
@@ -891,11 +905,20 @@ export default function Home() {
         }),
       });
       if (!response.ok) {
-        throw new Error(await response.text());
+        let message = copy.errorDefault;
+        try {
+          const errorBody = await response.json();
+          message = [errorBody.detail, errorBody.hint].filter(Boolean).join(" ");
+        } catch {
+          message = await response.text();
+        }
+        throw new Error(message || copy.errorDefault);
       }
       const data = await response.json();
-      setResults(data.results);
+      const nextResults = Array.isArray(data.results) ? data.results : [];
+      setResults(nextResults);
     } catch (err) {
+      setResults([]);
       setError(err instanceof Error ? err.message : copy.errorDefault);
     } finally {
       setLoading(false);
@@ -1175,8 +1198,16 @@ export default function Home() {
           {results.length === 0 ? (
             <div className="emptyState">
               <div className="emptyArrow">←</div>
-              <strong>{copy.emptyStrong}</strong>
-              <p>{copy.emptyText}</p>
+              <strong>
+                {hasSearched
+                  ? "No matching programs came back from the search."
+                  : copy.emptyStrong}
+              </strong>
+              <p>
+                {hasSearched
+                  ? "Check that the API server is running and OpenDeepSearch is configured, then try again."
+                  : copy.emptyText}
+              </p>
             </div>
           ) : (
             <>
@@ -1185,7 +1216,7 @@ export default function Home() {
                   <p>{resultsExplanation}</p>
                 </div>
               ) : null}
-              {topResults.map((result) => (
+              {results.map((result) => (
                 <article className="resultCard" key={result.resource.id}>
                   <div>
                     <span className="badge">
@@ -1203,11 +1234,71 @@ export default function Home() {
                       </span>
                     ) : null}
                   </div>
-                  <ul>
-                    {result.reasons.slice(0, 3).map((reason) => (
-                      <li key={reason}>{reason}</li>
-                    ))}
-                  </ul>
+                  {result.score_breakdown ? (
+                    <details className="scoreDetails">
+                      <summary>Score breakdown</summary>
+                      <div className="scoreFormula">
+                        Raw score: {result.score_breakdown.raw_score.toFixed(1)} ·{" "}
+                        {result.score_breakdown.formula}
+                      </div>
+                      {result.score_breakdown.items.length > 0 ? (
+                        <ul>
+                          {result.score_breakdown.items.map((item) => (
+                            <li key={`${item.label}-${item.detail}`}>
+                              <span>
+                                {item.points > 0 ? "+" : ""}
+                                {item.points.toFixed(1)}
+                              </span>
+                              <strong>{item.label}</strong>
+                              <p>{item.detail}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No positive profile-fit signals were found.</p>
+                      )}
+                    </details>
+                  ) : null}
+                  <section className="programExplanation">
+                    <h4>Why this program may help</h4>
+                    <ul>
+                      {result.reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  </section>
+                  <div className="programDetailGrid">
+                    {result.required_documents.length > 0 ? (
+                      <section>
+                        <h4>What to prepare</h4>
+                        <ul>
+                          {result.required_documents.map((document) => (
+                            <li key={document}>{document}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+                    {result.resource.application_methods.length > 0 ? (
+                      <section>
+                        <h4>How to apply</h4>
+                        <ul>
+                          {result.resource.application_methods.map((method) => (
+                            <li key={method}>{method}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+                    {result.resource.human_help.length > 0 ? (
+                      <section>
+                        <h4>Human help</h4>
+                        <ul>
+                          {result.resource.human_help.map((helper) => (
+                            <li key={helper}>{helper}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+                  </div>
                   {result.source_citations &&
                   result.source_citations.length > 0 ? (
                     <div className="sources">

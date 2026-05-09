@@ -74,10 +74,24 @@ class Resource(BaseModel):
     source_last_reviewed: str
 
 
+class ScoreBreakdownItem(BaseModel):
+    label: str
+    points: float
+    detail: str
+
+
+class ScoreBreakdown(BaseModel):
+    raw_score: float
+    normalized_score: float
+    formula: str
+    items: list[ScoreBreakdownItem] = Field(default_factory=list)
+
+
 class MatchResult(BaseModel):
     resource: Resource
     match_level: MatchLevel
     score: float
+    score_breakdown: ScoreBreakdown | None = None
     reasons: list[str]
     blockers: list[str]
     required_documents: list[str]

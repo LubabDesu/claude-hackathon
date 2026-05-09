@@ -1,4 +1,7 @@
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +11,7 @@ from pydantic import ValidationError
 from app.guide import build_guidance
 from app.matcher import match_resources
 from app.model_provider import provider
-from app.opendeepsearch import search_resources
+from app.opendeepsearch import OpenDeepSearchUnavailable, search_resources
 from app.models import (
     ExplainRequest,
     ExplainResponse,
@@ -99,11 +102,21 @@ async def profile_match(request: MatchRequest) -> MatchResponse:
 
 @app.post("/opendeepsearch", response_model=MatchResponse)
 async def opendeepsearch(request: SearchRequest) -> MatchResponse:
-    return MatchResponse(
-        results=search_resources(request.profile, request.query),
-        privacy=request.privacy,
-        disclaimer=DISCLAIMER,
-    )
+    try:
+        results = await search_resources(request.profile, request.query, require_live=True)
+    except OpenDeepSearchUnavailable as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": str(exc),
+                "hint": (
+                    "Install OpenDeepSearch in the API environment and configure "
+                    "SERPER_API_KEY or SEARXNG_INSTANCE_URL plus a LiteLLM model key."
+                ),
+            },
+        )
+
+    return MatchResponse(results=results, privacy=request.privacy, disclaimer=DISCLAIMER)
 
 
 @app.post("/explain", response_model=ExplainResponse)
