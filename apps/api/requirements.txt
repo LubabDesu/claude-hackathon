@@ -11,4 +11,6 @@ trafilatura
 sentence-transformers
 nest_asyncio 
 OpenDeepSearch @ git+https://github.com/sentient-agi/OpenDeepSearch.git
+python-multipart==0.0.12
+edge-tts>=7.0.0
 
