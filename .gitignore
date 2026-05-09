@@ -1,6 +1,23 @@
 node_modules
 
+# Env / local secrets
+.env
+.env.*
+*.env
+*.env.local
+apps/**/.env
+apps/**/.env.*
+apps/**/*.env.local
+
 # Next.js build output and caches
 .next
 apps/**/.next
 *.tsbuildinfo
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.venv/
+apps/**/.venv/

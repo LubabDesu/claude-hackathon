@@ -120,6 +120,7 @@ class GuidePageRequest(BaseModel):
     task: str = "Apply for benefits"
     fields: list[DomField] = Field(default_factory=list)
     visible_text: list[str] = Field(default_factory=list, alias="visibleText")
+    user_question: str | None = Field(default=None, alias="user_question")
 
 
 class GuideStep(BaseModel):
@@ -133,5 +134,11 @@ class GuideStep(BaseModel):
 class GuidePageResponse(BaseModel):
     steps: list[GuideStep]
     stop_reason: str | None = None
+    disclaimer: str
+
+
+class NarrationResponse(BaseModel):
+    narration: str
+    selector: str | None = None
     disclaimer: str
 

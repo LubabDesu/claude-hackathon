@@ -12,15 +12,18 @@
       <h1>Benefits Guide</h1>
       <label>
         Spoken language
-        <input id="language" value="Spanish" />
+        <select id="language">
+          <option value="Spanish">Spanish</option>
+          <option value="Vietnamese">Vietnamese</option>
+          <option value="Arabic">Arabic</option>
+          <option value="Simplified Chinese">Simplified Chinese</option>
+          <option value="Somali">Somali</option>
+          <option value="Tagalog">Tagalog</option>
+          <option value="Korean">Korean</option>
+          <option value="English">English</option>
+        </select>
       </label>
-      <label>
-        Current task
-        <input id="task" value="Apply for benefits" />
-      </label>
-      <button id="start">Explain this page</button>
-      <button id="stop" class="secondary">Stop speaking</button>
-      <p id="status">No data is stored by the extension unless Chrome saves your language preference.</p>
+      <p id="status">Navigate to getcalfresh.org or benefitscal.com — the guide widget appears on the page.</p>
     </main>
     <script src="popup.js"></script>
   </body>
