@@ -1,18 +1,21 @@
+import io
 import json
+import os
 
-from fastapi import FastAPI, Request
+import edge_tts
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import ValidationError
+from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel as PydanticBase, ValidationError
 
-from app.guide import build_guidance
+from app.guide import build_narration
 from app.matcher import match_resources
 from app.model_provider import provider
 from app.models import (
     ExplainRequest,
     ExplainResponse,
     GuidePageRequest,
-    GuidePageResponse,
+    NarrationResponse,
     MatchRequest,
     MatchResponse,
     SENSITIVE_KEYS,
@@ -33,7 +36,10 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3001",
-        "chrome-extension://*",
+        "https://benefitscal.com",
+        "https://www.benefitscal.com",
+        "https://getcalfresh.org",
+        "https://www.getcalfresh.org",
     ],
     allow_origin_regex=r"chrome-extension://.*",
     allow_methods=["*"],
@@ -44,6 +50,9 @@ app.add_middleware(
 @app.middleware("http")
 async def reject_sensitive_payloads(request: Request, call_next):
     if request.method in {"POST", "PUT", "PATCH"}:
+        content_type = request.headers.get("content-type", "")
+        if not content_type.startswith("application/json"):
+            return await call_next(request)
         body = await request.body()
         if _contains_sensitive_key(body):
             return JSONResponse(
@@ -123,10 +132,70 @@ async def explain(request: ExplainRequest) -> ExplainResponse:
     )
 
 
-@app.post("/guide/page", response_model=GuidePageResponse)
-async def guide_page(request: GuidePageRequest) -> GuidePageResponse:
-    steps, stop_reason = build_guidance(request)
-    return GuidePageResponse(steps=steps, stop_reason=stop_reason, disclaimer=DISCLAIMER)
+VOICE_MAP = {
+    "simplified chinese": "zh-CN-XiaoxiaoNeural",
+    "spanish": "es-MX-DaliaNeural",
+    "vietnamese": "vi-VN-HoaiMyNeural",
+    "arabic": "ar-SA-ZariyahNeural",
+    "korean": "ko-KR-SunHiNeural",
+    "tagalog": "fil-PH-BlessicaNeural",
+    "somali": "en-US-JennyNeural",
+    "english": "en-US-JennyNeural",
+}
+
+
+class TTSRequest(PydanticBase):
+    text: str
+    language: str
+
+
+@app.post("/guide/page", response_model=NarrationResponse)
+async def guide_page(request: GuidePageRequest) -> NarrationResponse:
+    return await build_narration(request)
+
+
+@app.post("/tts")
+async def tts_endpoint(req: TTSRequest):
+    voice = VOICE_MAP.get(req.language.lower(), "en-US-JennyNeural")
+    communicate = edge_tts.Communicate(req.text, voice)
+    buf = io.BytesIO()
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            buf.write(chunk["data"])
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="audio/mpeg")
+
+
+_WHISPER_LANG = {
+    "simplified chinese": "zh", "spanish": "es", "vietnamese": "vi",
+    "arabic": "ar", "korean": "ko", "tagalog": "tl", "somali": "so", "english": "en",
+}
+
+
+@app.post("/transcribe")
+async def transcribe(audio: UploadFile = File(...), language: str = "") -> dict[str, str]:
+    groq_key = os.getenv("GROQ_API_KEY")
+    if not groq_key:
+        return JSONResponse(status_code=503, content={"error": "GROQ_API_KEY not configured"})
+
+    audio_bytes = await audio.read()
+    whisper_lang = _WHISPER_LANG.get(language.lower().strip(), "")
+
+    transcribe_data: dict = {"model": "whisper-large-v3-turbo", "response_format": "json"}
+    if whisper_lang:
+        transcribe_data["language"] = whisper_lang
+
+    import httpx as _httpx
+    async with _httpx.AsyncClient(timeout=30) as client:
+        response = await client.post(
+            "https://api.groq.com/openai/v1/audio/transcriptions",
+            headers={"Authorization": f"Bearer {groq_key}"},
+            files={"file": (audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm")},
+            data=transcribe_data,
+        )
+        response.raise_for_status()
+        data = response.json()
+    return {"text": data.get("text", "")}
 
 
 @app.exception_handler(KeyError)
