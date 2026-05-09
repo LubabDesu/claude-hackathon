@@ -77,11 +77,12 @@ class Resource(BaseModel):
 class MatchResult(BaseModel):
     resource: Resource
     match_level: MatchLevel
-    score: int
+    score: float
     reasons: list[str]
     blockers: list[str]
     required_documents: list[str]
     next_action: str
+    source_citations: list[str] = Field(default_factory=list)
 
 
 class MatchRequest(BaseModel):

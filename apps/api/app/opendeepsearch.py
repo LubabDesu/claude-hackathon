@@ -105,9 +105,13 @@ def _rank_tiebreaker(result: MatchResult) -> tuple[int, str]:
     return (order.get(result.match_level, 3), result.resource.name)
 
 
-def _combined_search_score(match_score: int, relevance_score: int) -> float:
-    return max(match_score, 0) * 10 + relevance_score
+def _combined_search_score(match_score: float, relevance_score: int) -> float:
+    # match_score is already 0-100; normalize relevance (0-20) to 0-100 and combine
+    normalized_relevance = min(max(relevance_score, 0.0) / 20.0 * 100.0, 100.0)
+    # Weight match score 70%, relevance 30%
+    combined = (max(match_score, 0.0) * 0.7) + (normalized_relevance * 0.3)
+    return round(combined, 2)
 
 
-def _rank_by_match_score(result: MatchResult) -> int:
-    return max(result.score, 0)
+def _rank_by_match_score(result: MatchResult) -> float:
+    return max(result.score, 0.0)

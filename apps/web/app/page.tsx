@@ -52,6 +52,7 @@ type MatchResult = {
   blockers: string[];
   required_documents: string[];
   next_action: string;
+  source_citations?: string[];
 };
 
 type Copy = {
@@ -1197,7 +1198,9 @@ export default function Home() {
                     <span>{result.resource.category}</span>
                     <span>{result.resource.geography}</span>
                     {typeof result.score === "number" ? (
-                      <span className="score">Score: {result.score}</span>
+                      <span className="score">
+                        Match: {result.score.toFixed(1)}%
+                      </span>
                     ) : null}
                   </div>
                   <ul>
@@ -1205,6 +1208,25 @@ export default function Home() {
                       <li key={reason}>{reason}</li>
                     ))}
                   </ul>
+                  {result.source_citations &&
+                  result.source_citations.length > 0 ? (
+                    <div className="sources">
+                      <strong>Sources:</strong>
+                      <ul>
+                        {result.source_citations.map((citation) => (
+                          <li key={citation}>
+                            <a
+                              href={citation.split(" - ")[0]}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {citation.split(" - ")[1] || "Official source"}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   {result.blockers.length > 0 ? (
                     <p className="blocker">
                       {copy.check}: {result.blockers.join("; ")}
