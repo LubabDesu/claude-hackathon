@@ -9,6 +9,6 @@ langchain-text-splitters
 loguru
 trafilatura
 sentence-transformers
-nest_asyncio
+nest_asyncio 
 OpenDeepSearch @ git+https://github.com/sentient-agi/OpenDeepSearch.git
 
